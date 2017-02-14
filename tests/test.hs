@@ -48,6 +48,7 @@ tests = testGroup "Tests"
   , liftConduitTest
   , mapWriterTest
   , readStateTest
+  , polymorphicTests
   ]
 
 readerTests = testGroup "Reader Tests"
@@ -189,3 +190,15 @@ readStateTest = testCase "ReadState" $ do
     a2 = runReadState (Proxy :: Proxy Char) a1
 
   run (evalStateStrict 'w' a2) @?= 'w'
+
+polymorphicTests = testGroup "Polymorphic monadic values"
+  [ testCase "MonadReader WriterT" $ do
+      run (runReader 'c' (W.runWriterT polyReader1)) @?= ('c', ())
+  , testCase "MonadReader ReaderT" $ do
+      run (runReader 'c' (runReader False polyReader2)) @?= 'c'
+  ]
+  where
+    polyReader1 :: MonadReader Char m => W.WriterT () m Char
+    polyReader1 = ask
+    polyReader2 :: MonadReader Char m => R.ReaderT Bool m Char
+    polyReader2 = ask

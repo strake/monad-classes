@@ -7,6 +7,7 @@ import Control.Monad.Trans.Class
 import GHC.Prim (Proxy#, proxy#)
 import Control.Monad.Classes.Core
 import Control.Monad.Classes.Effects
+import Control.Monad.Classes.TypeErrors
 import Data.Peano (Peano (..))
 
 type instance CanDo IO (EffExcept e) = True
@@ -35,6 +36,11 @@ instance (MonadTrans t, Monad (t m), MonadExceptN n e m, Monad m)
   => MonadExceptN (Succ n) e (t m)
   where
     throwN _ = lift . throwN (proxy# :: Proxy# n)
+
+instance {-# INCOHERENT #-} (InstanceNotFoundError "MonadExcept" e m, Monad m)
+  => MonadExceptN n e m
+  where
+    throwN = error "unreachable"
 
 -- | The @'MonadExcept' e m@ constraint asserts that @m@ is a monad stack
 -- that supports throwing exceptions of type @e@

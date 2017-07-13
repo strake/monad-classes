@@ -5,6 +5,7 @@ import Control.Monad.Trans.Class
 import GHC.Prim (Proxy#, proxy#)
 import Control.Monad.Classes.Core
 import Control.Monad.Classes.Effects
+import Control.Monad.Classes.TypeErrors
 import Data.Peano (Peano (..))
 
 type instance CanDo (SS.StateT s m) eff = StateCanDo s eff
@@ -30,6 +31,11 @@ instance (Monad (t m), MonadTrans t, MonadStateN n s m, Monad m)
   => MonadStateN (Succ n) s (t m)
   where
     stateN _ = lift . stateN (proxy# :: Proxy# n)
+
+instance {-# INCOHERENT #-} (InstanceNotFoundError "MonadState" s m, Monad m)
+  => MonadStateN n s m
+  where
+    stateN = error "unreachable"
 
 -- | The @'MonadState' s m@ constraint asserts that @m@ is a monad stack
 -- that supports state operations on type @s@

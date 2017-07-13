@@ -7,6 +7,7 @@ import Control.Monad.Trans.Class
 import GHC.Prim (Proxy#, proxy#)
 import Control.Monad.Classes.Core
 import Control.Monad.Classes.Effects
+import Control.Monad.Classes.TypeErrors
 import Data.Peano
 
 type instance CanDo (R.ReaderT e m) eff = ReaderCanDo e eff
@@ -38,6 +39,11 @@ instance (MonadTrans t, Monad (t m), MonadReaderN n r m, Monad m)
   where
     askN _ = lift $ askN (proxy# :: Proxy# n)
 
+instance {-# INCOHERENT #-} (InstanceNotFoundError "MonadReader" r m, Monad m)
+  => MonadReaderN n r m
+  where
+    askN = error "unreachable"
+
 class Monad m => MonadLocalN (n :: Peano) r m where
   localN :: Proxy# n -> ((r -> r) -> m a -> m a)
 
@@ -65,6 +71,11 @@ instance (MonadTrans t, Monad (t m), MFunctor t, MonadLocalN n r m, Monad m)
   => MonadLocalN (Succ n) r (t m)
   where
     localN _ = \f -> hoist (localN (proxy# :: Proxy# n) f)
+
+instance {-# INCOHERENT #-} (InstanceNotFoundError "MonadLocal" r m, Monad m)
+  => MonadLocalN n r m
+  where
+    localN = error "unreachable"
 
 -- | The @'MonadReader' r m@ constraint asserts that @m@ is a monad stack
 -- that supports a fixed environment of type @r@

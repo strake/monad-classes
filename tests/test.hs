@@ -62,6 +62,8 @@ readerTests = testGroup "Reader Tests"
           altBase = 7 :: Integer
           altPower = 3 :: Int
           expected = 174 :: Integer
+          action' :: ( MonadLocal Int m, MonadLocal Integer m
+                     , MonadReader Int m, MonadReader Integer m ) => m Integer
           action' = do
             x <- local (const altBase) action
             y <- local (const altPower) action
@@ -70,6 +72,7 @@ readerTests = testGroup "Reader Tests"
   ]
   where
     f = (^) :: Integer -> Int -> Integer
+    action :: (MonadReader Int m, MonadReader Integer m) => m Integer
     action = f <$> ask <*> ask
 
 simpleStateTests = testGroup "Simple State"
@@ -81,6 +84,7 @@ simpleStateTests = testGroup "Simple State"
       (run $ runStateLazy (0 :: Int) (put (1 :: Int) *> get <* put (2 :: Int))) @?= (1 :: Int, 2 :: Int)
   ]
 
+twoStatesComp :: (MonadState Char m, MonadState Bool m) => m ()
 twoStatesComp = put 'b' >> put True >> put 'c'
 
 twoStatesTests = testCase "Two States" $

@@ -9,6 +9,7 @@ import Control.Monad.Trans.Class
 import GHC.Prim (Proxy#, proxy#)
 import Control.Monad.Classes.Core
 import Control.Monad.Classes.Effects
+import Control.Monad.Classes.TypeErrors
 import Data.Peano (Peano (..))
 
 type instance CanDo IO (EffExec IO) = True
@@ -23,6 +24,11 @@ instance (MonadTrans t, Monad (t m), MonadExecN n w m, Monad m)
   => MonadExecN (Succ n) w (t m)
   where
     execN _ = lift . execN (proxy# :: Proxy# n)
+
+instance {-# INCOHERENT #-} (InstanceNotFoundError "MonadExec" w m, Monad m)
+  => MonadExecN n w m
+  where
+    execN = error "unreachable"
 
 type MonadExec w m = MonadExecN (Find (EffExec w) m) w m
 

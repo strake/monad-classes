@@ -12,6 +12,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Classes.Core
 import Control.Monad.Classes.Effects
 import Control.Monad.Classes.Proxied
+import Control.Monad.Classes.TypeErrors
 import Data.Monoid
 import Data.Peano
 
@@ -49,6 +50,11 @@ instance (MonadTrans t, Monad (t m), MonadWriterN n w m, Monad m)
   => MonadWriterN (Succ n) w (t m)
   where
     tellN _ = lift . tellN (proxy# :: Proxy# n)
+
+instance {-# INCOHERENT #-} (InstanceNotFoundError "MonadWriter" w m, Monad m)
+  => MonadWriterN n w m
+  where
+    tellN = error "unreachable"
 
 -- | The @'MonadWriter' w m@ constraint asserts that @m@ is a monad stack
 -- that supports outputting values of type @w@

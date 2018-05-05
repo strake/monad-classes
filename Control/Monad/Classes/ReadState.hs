@@ -6,7 +6,6 @@ import Control.Monad.Classes.Reader
 import Control.Monad.Classes.State
 import Control.Monad.Trans.Identity
 import Control.Monad.Trans.Class
-import Control.Applicative
 import Control.Monad.Base
 import Control.Monad.Trans.Control
 import Data.Peano

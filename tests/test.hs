@@ -152,7 +152,7 @@ liftConduit
   => Proxy# eff
   -> C.ConduitM i o effM r
   -> C.ConduitM i o m    r
-liftConduit _ = hoist (liftN (proxy# :: Proxy# n))
+liftConduit _ = C.transPipe (liftN (proxy# :: Proxy# n))
 
 liftConduitTest = testCase "lift conduit" $
   (let
@@ -164,7 +164,7 @@ liftConduitTest = testCase "lift conduit" $
       C.await >>=
         maybe (return ()) (\x -> do lift $ tell [x::Int]; sink)
    in
-    W.execWriter $ hoist (liftN (proxy# :: Proxy# (Succ Zero))) src C.$$ sink
+    W.execWriter $ C.transPipe (liftN (proxy# :: Proxy# (Succ Zero))) src C.$$ sink
   ) @?= [1,2]
   {-
 

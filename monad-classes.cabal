@@ -67,7 +67,7 @@ library
 Test-suite test
   Default-language:
     Haskell2010
-  Extensions:
+  Default-extensions:
     FlexibleContexts
   Type:
     exitcode-stdio-1.0

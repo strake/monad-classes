@@ -13,6 +13,7 @@ import Control.Monad.Classes.State
 import Control.Monad.Classes.Writer
 import Control.Monad.Classes.Proxied
 import Data.Functor.Identity
+import Data.Monoid ((<>))
 import Data.Peano (Peano (..))
 
 newtype ZoomT big small m a = ZoomT (Proxied (VLLens big small) m a)

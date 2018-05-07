@@ -12,6 +12,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Classes.Core
 import Control.Monad.Classes.Effects
 import Control.Monad.Classes.Proxied
+import Data.Monoid ((<>))
 import Data.Peano
 
 type instance CanDo (WL.WriterT w m) eff = WriterCanDo w eff

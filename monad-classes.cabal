@@ -13,10 +13,9 @@ build-type:          Simple
 extra-source-files:
   README.md
 cabal-version:       >=1.10
-tested-with:         GHC >=7.8.2 && <7.9,
-                     GHC ==7.10.*,
-                     GHC ==7.12.*,
-                     GHC ==8.0.*
+tested-with:         GHC ==8.0.2
+                     GHC ==8.2.2
+                     GHC ==8.4.2
 
 library
   exposed-modules:

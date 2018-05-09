@@ -41,10 +41,12 @@ library
     transformers-base >=0.4.2,
     monad-control >=1,
     reflection >=1.4,
+    util >=0.1,
     ghc-prim
   -- hs-source-dirs:
   default-language:    Haskell2010
   default-extensions:
+    LambdaCase,
     TypeFamilies,
     DataKinds,
     KindSignatures,

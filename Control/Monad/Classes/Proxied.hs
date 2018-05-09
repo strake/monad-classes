@@ -27,22 +27,21 @@ import Control.Monad.Trans.Class
 import GHC.Prim (Proxy#, proxy#)
 import qualified Data.Reflection as R
 import Data.Proxy
+import Util ((&))
 
 newtype Proxied x m a = Proxied (forall (q :: *). R.Reifies q x => Proxy# q -> m a)
 
 instance Functor m => Functor (Proxied x m) where
-  fmap f (Proxied g) = Proxied (\px -> fmap f (g px))
+  fmap f (Proxied g) = Proxied (\px -> f <$> g px)
 
 instance Applicative m => Applicative (Proxied x m) where
   pure x = Proxied (\_ -> pure x)
   Proxied a <*> Proxied b = Proxied (\px -> a px <*> b px)
 
 instance Monad m => Monad (Proxied x m) where
-  return x = Proxied (\_ -> return x)
+  return = pure
   Proxied a >>= k = Proxied $ \px ->
-    a px >>= \v ->
-    case k v of
-      Proxied b -> b px
+    a px >>= k & \ case Proxied b -> b px
 
 instance Alternative m => Alternative (Proxied x m) where
   empty = Proxied $ \_ -> empty

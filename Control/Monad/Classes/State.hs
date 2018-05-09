@@ -50,9 +50,7 @@ get = state $ \s -> (s, s)
 -- | Gets specific component of the state, using a projection function
 -- supplied.
 gets :: MonadState s m => (s -> a) -> m a
-gets f = do
-    s <- get
-    return (f s)
+gets f = f <$> get
 
 -- | Maps an old state to a new state inside a state monad layer
 modify :: MonadState s m => (s -> s) -> m ()

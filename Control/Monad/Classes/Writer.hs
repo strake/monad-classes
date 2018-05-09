@@ -71,7 +71,7 @@ runWriterLazy :: (Monad m, Monoid w) => WL.WriterT w m a -> m (a, w)
 runWriterLazy = WL.runWriterT
 
 evalWriterLazy :: (Monad m, Monoid w) => WL.WriterT w m a -> m a
-evalWriterLazy = liftM fst . runWriterLazy
+evalWriterLazy = fmap fst . runWriterLazy
 
 execWriterLazy :: (Monad m, Monoid w) => WL.WriterT w m a -> m w
 execWriterLazy = WL.execWriterT
@@ -110,5 +110,4 @@ mapWriter
   => (w1 -> w2)
   -> CustomWriterT w1 m a
   -> m a
-mapWriter f a =
-  evalWriterWith (\w1 -> tell (f w1)) a
+mapWriter f = evalWriterWith (tell . f)

@@ -56,7 +56,7 @@ readerTests = testGroup "Reader Tests"
       let base = 5 :: Integer
           power = 3 :: Int
           expected = 125 :: Integer
-      in (runReader power action) base @?= expected
+      in runReader power action base @?= expected
   , testCase "local ask" $
       let base = 5 :: Integer
           power = 2 :: Int
@@ -67,7 +67,7 @@ readerTests = testGroup "Reader Tests"
             x <- local (const altBase) action
             y <- local (const altPower) action
             pure (x + y)
-      in (runReader power action') base @?= expected
+      in runReader power action' base @?= expected
   ]
   where
     f = (^) :: Integer -> Int -> Integer
@@ -97,16 +97,15 @@ liftingTest = testCase "Lifting through an unknown transformer" $
   (run $ runStateLazy 'a' $ runFoo $ runStateLazy False twoStatesComp) @?= (((), True), 'c')
 
 localState = testCase "MonadLocal StateT" $
-  (run $ evalStateStrict 'a' $
-    do
-      s1 <- get
-      (s2,s3) <- local (toEnum . (+1) . fromEnum :: Char -> Char) $ do
-        s2 <- get
-        put 'x'
-        s3 <- get
-        return (s2,s3)
-      s4 <- get
-      return [s1,s2,s3,s4]) @?= "abxa"
+  (run $ evalStateStrict 'a' $ do
+     s1 <- get
+     (s2,s3) <- local (toEnum . (+1) . fromEnum :: Char -> Char) $ do
+       s2 <- get
+       put 'x'
+       s3 <- get
+       return (s2,s3)
+     s4 <- get
+     return [s1,s2,s3,s4]) @?= "abxa"
 
 exceptTests = testGroup "Except"
   [ testCase "Catch before IO" $ do
@@ -124,7 +123,7 @@ execTests = testCase "Exec" $ do
       Foreign.peek ptr
   r @?= (True, ())
 
-zoomTests = testCase "Zoom" $ do
+zoomTests = testCase "Zoom" $
   ((4, [2,5], 6), Record [2,5,10] 6) @?=
     (run $ runStateStrict (Record [2] 4) $ runZoom (vanLaarhoven intL) $ runZoom (vanLaarhoven listL) $ do
       (s0 :: Int) <- get
@@ -136,10 +135,9 @@ zoomTests = testCase "Zoom" $ do
       return (s0, s1, s2)
     )
 
-liftNTests = testCase "liftN" $ do
+liftNTests = testCase "liftN" $
   (run $ runReader 'a' $ runReader 'b' $ runReader 'c' $
-    liftN (proxy# :: Proxy# (Succ Zero)) R.ask)
-  @?= 'b'
+   liftN (proxy# :: Proxy# (Succ Zero)) R.ask) @?= 'b'
 
 
 liftConduit
@@ -178,10 +176,10 @@ liftConduitTest = testCase "lift conduit" $
       (proxy# :: Proxy# (EffWriter String)) (do C.awaitForever $ \y -> tell (show (y :: Int) ++ "\n")))
   @?= ""-}
 
-mapWriterTest = testCase "mapWriter" $ do
+mapWriterTest = testCase "mapWriter" $
   run (execWriterStrict $ mapWriter (\(w :: Char) -> [w]) $ do { tell 'a'; tell 'b'; tell 'c' }) @?= "abc"
 
-readStateTest = testCase "ReadState" $ do
+readStateTest = testCase "ReadState" $
   let
     a1 :: MonadReader Char m => m Char
     a1 = ask
@@ -189,12 +187,12 @@ readStateTest = testCase "ReadState" $ do
     a2 :: MonadState Char m => m Char
     a2 = runReadState (Proxy :: Proxy Char) a1
 
-  run (evalStateStrict 'w' a2) @?= 'w'
+  in run (evalStateStrict 'w' a2) @?= 'w'
 
 polymorphicTests = testGroup "Polymorphic monadic values"
-  [ testCase "MonadReader WriterT" $ do
+  [ testCase "MonadReader WriterT" $
       run (runReader 'c' (W.runWriterT polyReader1)) @?= ('c', ())
-  , testCase "MonadReader ReaderT" $ do
+  , testCase "MonadReader ReaderT" $
       run (runReader 'c' (runReader False polyReader2)) @?= 'c'
   ]
   where

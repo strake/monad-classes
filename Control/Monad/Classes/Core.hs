@@ -11,12 +11,12 @@ import Data.Peano (Peano (..))
 
 -- | @'CanDo' m eff@ describes whether the given effect can be performed in the
 -- monad @m@ (without any additional lifting)
-type family CanDo (m :: (* -> *)) (eff :: k) :: Bool
+type family CanDo (m :: * -> *) (eff :: k) :: Bool
 
 -- | @'MapCanDo' eff stack@ maps the type-level function @(\m -> 'CanDo'
 -- m eff)@ over all layers that a monad transformer stack @stack@ consists of
 type family MapCanDo (eff :: k) (stack :: * -> *) :: [Bool] where
-  MapCanDo eff (t m) = (CanDo (t m) eff) ': MapCanDo eff m
+  MapCanDo eff (t m) = CanDo (t m) eff ': MapCanDo eff m
   MapCanDo eff m = '[ CanDo m eff ]
 
 -- | @'FindTrue' bs@ returns a (type-level) index of the first occurrence
